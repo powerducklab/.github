@@ -55,20 +55,27 @@ npm install @powerduck/openapi-mcp-server
 ```
 
 ```ts
-import { parse } from "@powerduck/openapi-parser";
+import { upgradeOasTo32, isOpenApiUpgradeError } from "@powerduck/openapi-parser";
 import { generate } from "@powerduck/openapi-codegen";
 
-// 1. Load and validate your OpenAPI document
-const result = parse(openApiDoc);
-if (!result.valid) {
-  console.error("Validation errors:", result.errors);
+// 1. Upgrade any Swagger 2.0 / OpenAPI 3.x document to validated 3.2
+let document: Awaited<ReturnType<typeof upgradeOasTo32>>;
+try {
+  document = await upgradeOasTo32(openApiDoc);
+} catch (error) {
+  if (isOpenApiUpgradeError(error)) {
+    console.error(`Upgrade failed [${error.code}]:`, error.message);
+    console.error("Issues:", error.issues);
+  } else {
+    console.error("Unexpected error:", error);
+  }
   process.exit(1);
 }
 
 // 2. Generate a runnable HTTP request for any operation
 const code = generate({
-  document: result.document,
-  path: "/pets",
+  document,
+  path: "/users/{id}",
   method: "get",
   language: "python",
   client: "requests",
