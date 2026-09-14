@@ -32,21 +32,21 @@ A complete suite of libraries for working with OpenAPI 3.2 documents — from pa
 
 ```bash
 # Install any package from npm
-npm install @powerduck/openapi-parser
 npm install @powerduck/openapi-codegen
-npm install @powerduck/md-editor
 ```
 
 ```ts
-import { parse } from "@powerduck/openapi-parser";
+import { generate } from "@powerduck/openapi-codegen";
 
-// Upgrade and validate any OpenAPI document to 3.2
-const result = parse(openApiDoc);
-if (result.valid) {
-  console.log("Valid OpenAPI 3.2:", result.document);
-} else {
-  console.error("Validation errors:", result.errors);
-}
+const code = generate({
+  document: openApiDocument,
+  path: "/pets/{id}",
+  method: "get",
+  language: "javascript",
+  client: "fetch",
+});
+
+console.log(code);
 ```
 
 ## Live Demos
