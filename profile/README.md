@@ -1,14 +1,31 @@
 # PowerDuck
 
-Open-source developer tools for API-first workflows. We build production-grade libraries for OpenAPI document processing, code generation, Markdown editing, and configuration patching.
+**Local-first OpenAPI 3.2 workbench.** Open, edit, and validate OpenAPI specs on your machine — then auto-generate API debug UIs, MCP servers, and documentation from a single source of truth.
 
 [Website](https://www.powerduck.com) &nbsp;·&nbsp; [Documentation](https://www.powerduck.com/docs/) &nbsp;·&nbsp; [Live Demos](https://www.powerduck.com/demo/)
 
 ---
 
-## OpenAPI Toolchain
+## What PowerDuck Does
 
-A complete suite of libraries for working with OpenAPI 3.2 documents — from parsing and validation to code generation, request debugging, and MCP server exposure.
+PowerDuck is built around a simple idea: your OpenAPI document is the single source of truth. Everything else — debugging, mocking, MCP exposure, docs — should be generated from it, not maintained separately.
+
+| Capability | Description |
+|---|---|
+| **Open & Validate** | Load any Swagger 2.0 / OpenAPI 3.0 / 3.1 / 3.2 file. Auto-upgrade and validate to OpenAPI 3.2 with machine-readable error codes. |
+| **Spec Editing** | Edit YAML/JSON with real-time validation, circular-reference detection, and zero input mutation. |
+| **API Debug UI** | Auto-generate a request debugger from your spec. HTTP, SSE, and WebSocket support with response write-back. |
+| **MCP Server** | Expose any OpenAPI API as a Model Context Protocol server with Tools, Prompts, Resources, and an admin Web UI. |
+| **Code Generation** | Generate runnable HTTP request code in 21 languages and 41 client combinations — browser-compatible, zero dependencies. |
+| **API Documentation** | Generate clean, interactive API reference documentation from your spec. |
+
+---
+
+## Open-Source Libraries
+
+PowerDuck's workbench is powered by a suite of standalone, production-grade libraries. Use them individually in your own projects, or together as the full workbench.
+
+### OpenAPI Toolchain
 
 | Package | Version | Description |
 |---|---|---|
@@ -19,7 +36,7 @@ A complete suite of libraries for working with OpenAPI 3.2 documents — from pa
 | [`@powerduck/openapi-cli`](https://www.npmjs.com/package/@powerduck/openapi-cli) | [![npm](https://img.shields.io/npm/v/@powerduck/openapi-cli)](https://www.npmjs.com/package/@powerduck/openapi-cli) | CI-ready CLI for batch-testing OpenAPI documents across HTTP, SSE, WebSocket, GraphQL, gRPC, and MCP. |
 | [`@powerduck/openapi-mcp-server`](https://www.npmjs.com/package/@powerduck/openapi-mcp-server) | [![npm](https://img.shields.io/npm/v/@powerduck/openapi-mcp-server)](https://www.npmjs.com/package/@powerduck/openapi-mcp-server) | Production-oriented OpenAPI to MCP server library with Tools, Prompts, Resources, Web UI, and admin runtime. |
 
-## Editor & Config Tools
+### Editor & Config Tools
 
 | Package | Version | Description |
 |---|---|---|
@@ -32,18 +49,29 @@ A complete suite of libraries for working with OpenAPI 3.2 documents — from pa
 
 ```bash
 # Install any package from npm
+npm install @powerduck/openapi-parser
 npm install @powerduck/openapi-codegen
+npm install @powerduck/openapi-mcp-server
 ```
 
 ```ts
+import { parse } from "@powerduck/openapi-parser";
 import { generate } from "@powerduck/openapi-codegen";
 
+// 1. Load and validate your OpenAPI document
+const result = parse(openApiDoc);
+if (!result.valid) {
+  console.error("Validation errors:", result.errors);
+  process.exit(1);
+}
+
+// 2. Generate a runnable HTTP request for any operation
 const code = generate({
-  document: openApiDocument,
-  path: "/pets/{id}",
+  document: result.document,
+  path: "/pets",
   method: "get",
-  language: "javascript",
-  client: "fetch",
+  language: "python",
+  client: "requests",
 });
 
 console.log(code);
